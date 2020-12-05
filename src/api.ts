@@ -1,3 +1,4 @@
+import { firebaseFunctions } from "./firebase";
 import { varsomMockData } from "./varsomMockData";
 
 const USE_STATIC_DATA = true;
@@ -12,35 +13,35 @@ const googleMapsApiKey = "AIzaSyBXOqcLadhK_VfFAJxnDn5mue4gQD_Sl20";
 
 const googleMapsBaseUrl = "https://maps.googleapis.com/maps/api/geocode/json";
 
-const yrLocationForecastUrl =
-  "https://api.met.no/weatherapi/locationforecast/2.0/compact";
-const sognefjellshytta = {
-  lat: "61.5650219",
-  long: "7.997901800000001",
-};
-
 export interface IDayWeatherForecast {
   next6hoursSymbol: string;
   next6hoursPrecAmount: number;
 }
 
-export async function getWeatherFromYr() {
-  if (USE_STATIC_DATA) return null;
+export async function getWeatherFromYr(
+  coordinates: GoogleMapsCoordinates | null
+) {
+  if (!coordinates) return null;
 
-  const url = `${yrLocationForecastUrl}?lat=${sognefjellshytta.lat}&long=${sognefjellshytta.long}`;
-  return fetch(url)
-    .then((res) => res.json())
-    .then((res) => {
-      const dayForecast: IDayWeatherForecast = {
-        next6hoursSymbol:
-          res.properties.timeseries[0].data.next_6_hours.summary.symbol_code,
-        next6hoursPrecAmount:
-          res.properties.timeseries[0].data.next_6_hours.details
-            .precipitation_amount,
-      };
+  // if (USE_STATIC_DATA) return null;
 
-      return dayForecast;
-    });
+  var getWeather = firebaseFunctions.httpsCallable("getWeatherDataFromYr");
+
+  return getWeather({ lat: coordinates.lat, lon: coordinates.long }).then(
+    (res) => {
+      console.log(res);
+      return res.data;
+    }
+  );
+
+  // const firebaseYrFunctionUrl = `http://localhost:5001/godsno-c543b/us-central1/getWeatherDataFromYr/?lat=${coordinates.lat}&long=${coordinates.long}`;
+
+  // return fetch(firebaseYrFunctionUrl)
+  //   .then((res) => res.json())
+  //   .then((res) => {
+  //     console.log(res);
+  //     return res;
+  //   });
 }
 
 export interface IAvyAdvice {

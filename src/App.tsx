@@ -35,7 +35,7 @@ function App() {
     getVarselFromVarsomSimple(addressCoordinates).then((v) =>
       setVarsomVarsel(v)
     );
-    getWeatherFromYr().then((w) => setWeather(w));
+    getWeatherFromYr(addressCoordinates).then((w) => setWeather(w));
   }, [addressCoordinates]);
 
   const onSearch = (query: string) => {
