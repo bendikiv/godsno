@@ -1,9 +1,11 @@
 import { varsomMockData } from "./varsomMockData";
 
+const USE_STATIC_DATA = true;
+
 const varsomBaseUrl =
   "https://api01.nve.no/hydrology/forecast/avalanche/v6.0.0/api/AvalancheWarningByCoordinates";
 
-const varsomSimpleUrl = "Simple";
+// const varsomSimpleUrl = "Simple";
 const varsomDetailedUrl = "Detail";
 
 const googleMapsApiKey = "AIzaSyBXOqcLadhK_VfFAJxnDn5mue4gQD_Sl20";
@@ -23,7 +25,8 @@ export interface IDayWeatherForecast {
 }
 
 export async function getWeatherFromYr() {
-  return null;
+  if (USE_STATIC_DATA) return null;
+
   const url = `${yrLocationForecastUrl}?lat=${sognefjellshytta.lat}&long=${sognefjellshytta.long}`;
   return fetch(url)
     .then((res) => res.json())
@@ -66,7 +69,6 @@ export async function getVarselFromVarsomSimple(
 ) {
   if (!coordinates) return null;
 
-  console.log("Prøver å kalle Varsom API med koordinater: ", coordinates);
   const url = `${varsomBaseUrl}/${varsomDetailedUrl}/${coordinates.lat}/${coordinates.long}/1`;
 
   const mockData = varsomMockData;
@@ -74,8 +76,10 @@ export async function getVarselFromVarsomSimple(
   return fetch(url)
     .then((res) => res.json())
     .then((res) => {
-      console.log("Resultat fra varsom API: ", res);
       if (!res) return null;
+
+      if (USE_STATIC_DATA) res = mockData;
+
       const varsomVarsel: IDagsVarsel[] = res.map((r: any) => {
         const dagsVarsel: IDagsVarsel = {
           dangerLevel: r.DangerLevel,
@@ -116,7 +120,7 @@ export async function getCoordinatesFromAddress(address: string) {
     lat: "8.552375999999999",
   };
 
-  // return hemsedalCoordinates;
+  if (USE_STATIC_DATA) return hemsedalCoordinates;
 
   if (!address || address === "") return null;
 
