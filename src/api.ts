@@ -23,6 +23,7 @@ export interface IDayWeatherForecast {
 }
 
 export async function getWeatherFromYr() {
+  return null;
   const url = `${yrLocationForecastUrl}?lat=${sognefjellshytta.lat}&long=${sognefjellshytta.long}`;
   return fetch(url)
     .then((res) => res.json())
@@ -44,12 +45,19 @@ export interface IAvyAdvice {
   imgUrl: string;
 }
 
+export interface IAvyProblem {
+  avyProblemId: number;
+  name: string;
+  description: string;
+}
+
 export interface IDagsVarsel {
   dangerLevel: string;
   regionName: string;
   regionId: number;
   validFrom: Date;
   validTo: Date;
+  avyProblems: IAvyProblem[];
   advices: IAvyAdvice[];
 }
 
@@ -58,24 +66,35 @@ export async function getVarselFromVarsomSimple(
 ) {
   if (!coordinates) return null;
 
-  const url = `${varsomBaseUrl}/${varsomDetailedUrl}/${coordinates.long}/${coordinates.lat}/1`;
+  console.log("Prøver å kalle Varsom API med koordinater: ", coordinates);
+  const url = `${varsomBaseUrl}/${varsomDetailedUrl}/${coordinates.lat}/${coordinates.long}/1`;
 
   const mockData = varsomMockData;
 
   return fetch(url)
     .then((res) => res.json())
     .then((res) => {
-      const varsomVarsel: IDagsVarsel[] = mockData.map((r: any) => {
+      console.log("Resultat fra varsom API: ", res);
+      if (!res) return null;
+      const varsomVarsel: IDagsVarsel[] = res.map((r: any) => {
         const dagsVarsel: IDagsVarsel = {
           dangerLevel: r.DangerLevel,
           regionId: r.RegionId,
           regionName: r.RegionName,
           validFrom: r.ValidFrom,
           validTo: r.ValidTo,
+          avyProblems: r.AvalancheProblems
+            ? r.AvalancheProblems.map((avyProb: any) => {
+                return {
+                  avyProblemId: avyProb.AvalCauseId,
+                  name: avyProb.AvalancheProblemTypeName,
+                  description: avyProb.AvalCauseName,
+                };
+              })
+            : [],
           advices: r.AvalancheAdvices
             ? r.AvalancheAdvices.map((a: any) => {
-                const advice: IAvyAdvice = { text: a.Text, imgUrl: a.ImageUrl };
-                return advice;
+                return { text: a.Text, imgUrl: a.ImageUrl };
               })
             : [],
         };
@@ -97,7 +116,7 @@ export async function getCoordinatesFromAddress(address: string) {
     lat: "8.552375999999999",
   };
 
-  return hemsedalCoordinates;
+  // return hemsedalCoordinates;
 
   if (!address || address === "") return null;
 

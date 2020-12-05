@@ -8,6 +8,7 @@ import {
   Flex,
   Text,
   Image,
+  Divider,
 } from "@chakra-ui/react";
 import {
   getVarselFromVarsomSimple,
@@ -16,6 +17,8 @@ import {
   IDagsVarsel,
   IDayWeatherForecast,
   getWeatherFromYr,
+  IAvyAdvice,
+  IAvyProblem,
 } from "./api";
 import { SearchIcon } from "@chakra-ui/icons";
 
@@ -45,16 +48,14 @@ function App() {
   return (
     <div className="App">
       <Box>
-        <Box backgroundColor="#caf0f8" mb="2rem" pt="1rem" pb="1rem">
+        <Box mb="2rem" pt="1rem" pb="1rem">
           <Heading size="4xl">Hvor er det god snø nå?</Heading>
         </Box>
         <Box>
-          <Heading size="m" mb="1rem">
-            Hvor vil du på ski?
-          </Heading>
           <Input
             width="40%"
             mb="1rem"
+            placeholder="Hvor vil du på ski?"
             onChange={(event) => setAddressQuery(event.target.value)}
           ></Input>
           <IconButton
@@ -64,15 +65,22 @@ function App() {
           />
         </Box>
         <Box>
-          <Heading>{addressQuery === "" ? "Velg sted" : addressQuery}</Heading>
+          <Heading mb="1rem">
+            {addressQuery === "" ? "Hvor?" : addressQuery}
+          </Heading>
         </Box>
       </Box>
-      <Flex justifyContent="space-between">
-        <Box width="33%" backgroundColor="#f4a261">
+      <Flex justifyContent="space-around" flexWrap="wrap">
+        <Box width="35rem" boxShadow="5px 5px 8px #f4a261" mb="2rem">
           <Heading>Varsom</Heading>
           {varsomVarsel && <Varsom varsomVarsel={varsomVarsel} />}
         </Box>
-        <Box width="33%" height="20rem" backgroundColor="#90e0ef">
+        <Box
+          width="35rem"
+          height="20rem"
+          boxShadow="5px 5px 8px #90e0ef"
+          mb="2rem"
+        >
           <Heading>Yr</Heading>
           {weather && (
             <Box>
@@ -81,7 +89,12 @@ function App() {
             </Box>
           )}
         </Box>
-        <Box width="33%" height="20rem" backgroundColor="#833AB4">
+        <Box
+          width="35rem"
+          height="20rem"
+          boxShadow="5px 5px 8px #833AB4"
+          mb="2rem"
+        >
           <Heading>Instagram</Heading>
         </Box>
       </Flex>
@@ -109,22 +122,38 @@ const Varsom = ({ varsomVarsel }: VarsomProps) => {
           >
             <Box>
               <Text>{dagsVarsel.validFrom.toLocaleString().substr(0, 10)}</Text>
-              <Text fontWeight="bold" fontSize="1.5rem">
+              <Heading size="lg" mb="2rem">
                 Faregrad: {dagsVarsel.dangerLevel}
-              </Text>
+              </Heading>
+              <Box textAlign="left">
+                {dagsVarsel.avyProblems.map(
+                  (avyProb: IAvyProblem, i: number) => {
+                    return (
+                      <Box key={i} mb="1rem">
+                        <Heading size="sm">Skredproblem {i + 1}:</Heading>
+                        <Text>{avyProb.name}</Text>
+                        <Text>{avyProb.description}</Text>
+                      </Box>
+                    );
+                  }
+                )}
+              </Box>
             </Box>
             <Box width="50%">
-              <Text fontWeight="bold">Ferdselsråd:</Text>
-              <Flex>
-                <Image
-                  src={dagsVarsel.advices[0]?.imgUrl}
-                  width="40%"
-                  height="40$"
-                />
-                <Text pl="0.5rem" textAlign="left">
-                  {dagsVarsel.advices[0]?.text}
-                </Text>
-              </Flex>
+              {dagsVarsel.advices.map((a: IAvyAdvice, i: number) => {
+                return (
+                  <Box key={i}>
+                    <Heading size="sm">Ferdselsråd:</Heading>
+                    <Flex>
+                      <Image src={a.imgUrl} width="40%" height="40$" />
+                      <Text pl="0.5rem" textAlign="left">
+                        {a.text}
+                      </Text>
+                    </Flex>
+                    {i !== 0 && <Divider orientation="horizontal" />}
+                  </Box>
+                );
+              })}
             </Box>
           </Flex>
         );
