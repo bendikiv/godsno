@@ -39,11 +39,8 @@ function App() {
   }, [addressCoordinates]);
 
   const onSearch = (query: string) => {
-    console.log(query);
     getCoordinatesFromAddress(query).then((c) => setAddressCoordinates(c));
   };
-
-  console.log("varsomVarsel: ", varsomVarsel);
 
   return (
     <div className="App">

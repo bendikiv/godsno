@@ -104,7 +104,6 @@ export async function getVarselFromVarsomSimple(
         };
         return dagsVarsel;
       });
-      console.log(varsomVarsel);
       return varsomVarsel;
     });
 }
@@ -116,8 +115,8 @@ export interface GoogleMapsCoordinates {
 
 export async function getCoordinatesFromAddress(address: string) {
   const hemsedalCoordinates: GoogleMapsCoordinates = {
-    long: "60.86306479999999",
-    lat: "8.552375999999999",
+    lat: "60.86306479999999",
+    long: "8.552375999999999",
   };
 
   if (USE_STATIC_DATA) return hemsedalCoordinates;
@@ -128,7 +127,6 @@ export async function getCoordinatesFromAddress(address: string) {
   return fetch(url)
     .then((res) => res.json())
     .then((res) => {
-      console.log(res);
       if (!res) return null;
       const long = res.results[0].geometry.location.lng;
       const lat = res.results[0].geometry.location.lat;
