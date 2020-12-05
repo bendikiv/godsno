@@ -1,4 +1,5 @@
 import { varsomMockData } from "./varsomMockData";
+import { getWeatherDataFromYr } from "../functions/src/index";
 
 const USE_STATIC_DATA = true;
 
