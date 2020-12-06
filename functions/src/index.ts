@@ -1,6 +1,5 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-// import * as fetch from "node-fetch";
 let cors = require("cors");
 const fetch = require("node-fetch");
 
@@ -14,21 +13,30 @@ const FIREBASE_REGION = "europe-west1";
 //
 export const helloWorld = functions
   .region(FIREBASE_REGION)
-  .https.onRequest((request, response) => {
-    functions.logger.info("Hello logs!", { structuredData: true });
-    response.send("Hello from Firebase!");
+  .https.onRequest(async (request, response) => {
+    corsHandler(request, response, () => {
+      functions.logger.info("Hello logs!", { structuredData: true });
+      response.status(200).json({ data: "Hello from Firebase!" });
+    });
   });
 
 export const getWeatherDataFromYr = functions
   .region(FIREBASE_REGION)
-  .https.onRequest(async (req, res) => {
+  .https.onRequest(async (req: functions.Request, res: functions.Response) => {
     corsHandler(req, res, async () => {
+      const reqData = req.body.data;
+
+      functions.logger.info("Running function getWeatherDataFromYr...");
+      functions.logger.info(
+        `Request query params: lat=${reqData.lat}, lon=${reqData.lon}}`
+      );
+
       const yrbaseUrl =
         "https://api.met.no/weatherapi/locationforecast/2.0/compact";
 
       const coordinates = {
-        lat: req.query.lat?.toString() || "",
-        lon: req.query.lon?.toString() || "",
+        lat: reqData.lat?.toString() || "",
+        lon: reqData.lon?.toString() || "",
       };
       const url = `${yrbaseUrl}?lat=${coordinates.lat}&lon=${coordinates.lon}`;
 
@@ -43,10 +51,15 @@ export const getWeatherDataFromYr = functions
               res.properties.timeseries[0].data.next_6_hours.details
                 .precipitation_amount,
           };
+        })
+        .catch((error: any) => {
+          functions.logger.error(
+            "Caught error while fetching from Yr api, error: ",
+            error
+          );
+          return null;
         });
 
-      res.status(200).json({ data: result });
-      // res.json(result);
-      // res.send(result);
+      res.status(200).json({ data: result, gotResult: result !== null });
     });
   });

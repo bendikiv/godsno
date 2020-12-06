@@ -23,25 +23,20 @@ export async function getWeatherFromYr(
 ) {
   if (!coordinates) return null;
 
-  // if (USE_STATIC_DATA) return null;
-
   var getWeather = firebaseFunctions.httpsCallable("getWeatherDataFromYr");
 
-  return getWeather({ lat: coordinates.lat, lon: coordinates.long }).then(
-    (res) => {
-      console.log(res.data);
-      return res.data.json();
-    }
-  );
+  const result = await getWeather({
+    lat: coordinates.lat,
+    lon: coordinates.lon,
+  }).then((res) => {
+    return {
+      next6hoursSymbol: res.data.next6hoursSymbol,
+      next6hoursPrecAmount: res.data.next6hoursPrecAmount,
+    };
+  });
 
-  // const firebaseYrFunctionUrl = `http://localhost:5001/godsno-c543b/us-central1/getWeatherDataFromYr/?lat=${coordinates.lat}&long=${coordinates.long}`;
-
-  // return fetch(firebaseYrFunctionUrl)
-  //   .then((res) => res.json())
-  //   .then((res) => {
-  //     console.log(res);
-  //     return res;
-  //   });
+  console.log(result);
+  return result;
 }
 
 export interface IAvyAdvice {
@@ -70,7 +65,7 @@ export async function getVarselFromVarsomSimple(
 ) {
   if (!coordinates) return null;
 
-  const url = `${varsomBaseUrl}/${varsomDetailedUrl}/${coordinates.lat}/${coordinates.long}/1`;
+  const url = `${varsomBaseUrl}/${varsomDetailedUrl}/${coordinates.lat}/${coordinates.lon}/1`;
 
   const mockData = varsomMockData;
 
@@ -110,14 +105,14 @@ export async function getVarselFromVarsomSimple(
 }
 
 export interface GoogleMapsCoordinates {
-  long: string;
+  lon: string;
   lat: string;
 }
 
 export async function getCoordinatesFromAddress(address: string) {
   const hemsedalCoordinates: GoogleMapsCoordinates = {
     lat: "60.86306479999999",
-    long: "8.552375999999999",
+    lon: "8.552375999999999",
   };
 
   if (USE_STATIC_DATA) return hemsedalCoordinates;
@@ -129,11 +124,11 @@ export async function getCoordinatesFromAddress(address: string) {
     .then((res) => res.json())
     .then((res) => {
       if (!res) return null;
-      const long = res.results[0].geometry.location.lng;
+      const lon = res.results[0].geometry.location.lng;
       const lat = res.results[0].geometry.location.lat;
       const coordinates: GoogleMapsCoordinates = {
         lat,
-        long,
+        lon,
       };
       return coordinates;
     });
