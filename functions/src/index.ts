@@ -7,17 +7,21 @@ const fetch = require("node-fetch");
 admin.initializeApp();
 
 const corsHandler = cors({ origin: true });
+const REGION = "europe-west1";
 
 // // Start writing Firebase Functions
 // // https://firebase.google.com/docs/functions/typescript
 //
-export const helloWorld = functions.https.onRequest((request, response) => {
-  functions.logger.info("Hello logs!", { structuredData: true });
-  response.send("Hello from Firebase!");
-});
+export const helloWorld = functions
+  .region(REGION)
+  .https.onRequest((request, response) => {
+    functions.logger.info("Hello logs!", { structuredData: true });
+    response.send("Hello from Firebase!");
+  });
 
-export const getWeatherDataFromYr = functions.https.onRequest(
-  async (req, res) => {
+export const getWeatherDataFromYr = functions
+  .region(REGION)
+  .https.onRequest(async (req, res) => {
     corsHandler(req, res, async () => {
       const yrbaseUrl =
         "https://api.met.no/weatherapi/locationforecast/2.0/compact";
@@ -41,8 +45,8 @@ export const getWeatherDataFromYr = functions.https.onRequest(
           };
         });
 
-      res.json(result);
-      res.send(result);
+      res.status(200).json({ data: result });
+      // res.json(result);
+      // res.send(result);
     });
-  }
-);
+  });

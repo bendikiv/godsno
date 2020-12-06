@@ -29,8 +29,8 @@ export async function getWeatherFromYr(
 
   return getWeather({ lat: coordinates.lat, lon: coordinates.long }).then(
     (res) => {
-      console.log(res);
-      return res.data;
+      console.log(res.data);
+      return res.data.json();
     }
   );
 
