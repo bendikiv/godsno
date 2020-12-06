@@ -7,20 +7,20 @@ const fetch = require("node-fetch");
 admin.initializeApp();
 
 const corsHandler = cors({ origin: true });
-const REGION = "europe-west1";
+const FIREBASE_REGION = "europe-west1";
 
 // // Start writing Firebase Functions
 // // https://firebase.google.com/docs/functions/typescript
 //
 export const helloWorld = functions
-  .region(REGION)
+  .region(FIREBASE_REGION)
   .https.onRequest((request, response) => {
     functions.logger.info("Hello logs!", { structuredData: true });
     response.send("Hello from Firebase!");
   });
 
 export const getWeatherDataFromYr = functions
-  .region(REGION)
+  .region(FIREBASE_REGION)
   .https.onRequest(async (req, res) => {
     corsHandler(req, res, async () => {
       const yrbaseUrl =

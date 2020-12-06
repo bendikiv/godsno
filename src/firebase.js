@@ -14,13 +14,16 @@ const firebaseConfig = {
   measurementId: "G-WQ2QZSH0NG",
 };
 
+// For allowing to call functions (prevent CORS error)
+const FIREBASE_REGION = "europe-west1";
+
 // Firestore
 const firebaseApp = firebase.initializeApp(firebaseConfig);
 export const db = firebaseApp.firestore();
 
 // Firebase Functions
 // Initialize Cloud Functions through Firebase
-export var firebaseFunctions = firebase.functions();
+export var firebaseFunctions = firebase.app().functions(FIREBASE_REGION);
 
 // Login/Authentication
 // const googleProvider = new firebase.auth.GoogleAuthProvider();
