@@ -1,5 +1,6 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
+import { addDays, isBefore } from "date-fns";
 let cors = require("cors");
 const fetch = require("node-fetch");
 
@@ -14,9 +15,31 @@ const FIREBASE_REGION = "europe-west1";
 export const helloWorld = functions
   .region(FIREBASE_REGION)
   .https.onRequest(async (request, response) => {
-    corsHandler(request, response, () => {
-      functions.logger.info("Hello logs!", { structuredData: true });
-      response.status(200).json({ data: "Hello from Firebase!" });
+    corsHandler(request, response, async () => {
+      const hemsedalCoordinates = {
+        lat: "60.86306479999999",
+        lon: "8.552375999999999",
+      };
+
+      const yrbaseUrl =
+        "https://api.met.no/weatherapi/locationforecast/2.0/compact";
+
+      const url = `${yrbaseUrl}?lat=${hemsedalCoordinates.lat}&lon=${hemsedalCoordinates.lon}`;
+
+      const result = await fetch(url)
+        .then((res: any) => res.json())
+        .then((res: any) => {
+          return getPrecipitationNext3Days(res);
+        })
+        .catch((error: any) => {
+          functions.logger.error(
+            "Caught error while fetching from Yr api, error: ",
+            error
+          );
+          return null;
+        });
+
+      response.status(200).json({ data: result, gotResult: result !== null });
     });
   });
 
@@ -50,6 +73,10 @@ export const getWeatherDataFromYr = functions
             next6hoursPrecAmount:
               res.properties.timeseries[0].data.next_6_hours.details
                 .precipitation_amount,
+            next3DaysSymbol:
+              res.properties.timeseries[0].data.next_12_hours.summary
+                .symbol_code,
+            next3DaysPrecAmount: getPrecipitationNext3Days(res),
           };
         })
         .catch((error: any) => {
@@ -63,3 +90,22 @@ export const getWeatherDataFromYr = functions
       res.status(200).json({ data: result, gotResult: result !== null });
     });
   });
+
+const getPrecipitationNext3Days = (yrData: any) => {
+  const timeseries = yrData.properties.timeseries;
+  const currentDate = timeseries[0].time;
+
+  let totalPrecip = 0;
+
+  timeseries.forEach((t: any) => {
+    if (t.data.next_1_hours) {
+      totalPrecip += t.data.next_1_hours.details.precipitation_amount;
+    } else {
+      if (t.data.next_6_hours && isBefore(t.time, addDays(currentDate, 3))) {
+        totalPrecip += t.data.next_6_hours.details.precipitation_amount;
+      }
+    }
+  });
+
+  return totalPrecip;
+};

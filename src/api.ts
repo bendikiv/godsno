@@ -16,6 +16,8 @@ const googleMapsBaseUrl = "https://maps.googleapis.com/maps/api/geocode/json";
 export interface IDayWeatherForecast {
   next6hoursSymbol: string;
   next6hoursPrecAmount: number;
+  next3DaysSymbol: string;
+  next3DaysPrecAmount: number;
 }
 
 export async function getWeatherFromYr(
@@ -32,6 +34,8 @@ export async function getWeatherFromYr(
     return {
       next6hoursSymbol: res.data.next6hoursSymbol,
       next6hoursPrecAmount: res.data.next6hoursPrecAmount,
+      next3DaysSymbol: res.data.next3DaysSymbol,
+      next3DaysPrecAmount: res.data.next3DaysPrecAmount,
     };
   });
 

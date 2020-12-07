@@ -42,6 +42,8 @@ function App() {
     getCoordinatesFromAddress(query).then((c) => setAddressCoordinates(c));
   };
 
+  console.log(`/src/images/weathericons/png/${weather?.next6hoursSymbol}.png`);
+
   return (
     <div className="App">
       <Box>
@@ -78,12 +80,46 @@ function App() {
           boxShadow="5px 5px 8px #90e0ef"
           mb="2rem"
         >
-          <Heading>Yr</Heading>
+          <Heading mb="1rem">Yr</Heading>
           {weather && (
-            <Box>
-              <Text>{weather.next6hoursSymbol}</Text>
-              <Text>{weather.next6hoursPrecAmount}</Text>
-            </Box>
+            <Flex justifyContent="space-between">
+              <Box>
+                <Heading size="md">Siste 3 døgn:</Heading>
+                {/* <Image
+                  boxSize="100px"
+                  src={
+                    window.location.origin +
+                    `/images/weathericons/png/${weather.next6hoursSymbol}.png`
+                  }
+                  alt="weather icon"
+                />
+                <Text>{weather.next6hoursPrecAmount}mm</Text> */}
+              </Box>
+              <Box>
+                <Heading size="md">Neste 6 timer:</Heading>
+                <Image
+                  boxSize="100px"
+                  src={
+                    window.location.origin +
+                    `/images/weathericons/png/${weather.next6hoursSymbol}.png`
+                  }
+                  alt="weather icon"
+                />
+                <Text>{weather.next6hoursPrecAmount}mm</Text>
+              </Box>
+              <Box>
+                <Heading size="md">Neste 3 døgn:</Heading>
+                <Image
+                  boxSize="100px"
+                  src={
+                    window.location.origin +
+                    `/images/weathericons/png/${weather.next3DaysSymbol}.png`
+                  }
+                  alt="weather icon"
+                />
+                <Text>{weather.next3DaysPrecAmount}mm</Text>
+              </Box>
+            </Flex>
           )}
         </Box>
         <Box
