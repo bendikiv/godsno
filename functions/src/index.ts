@@ -1,6 +1,7 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { addDays, isBefore } from "date-fns";
+import { YrWeatherData } from "./contracts";
 let cors = require("cors");
 const fetch = require("node-fetch");
 
@@ -29,7 +30,7 @@ export const helloWorld = functions
       const result = await fetch(url)
         .then((res: any) => res.json())
         .then((res: any) => {
-          return getPrecipitationNext3Days(res);
+          return parseWeatherData(res);
         })
         .catch((error: any) => {
           functions.logger.error(
@@ -49,7 +50,10 @@ export const getWeatherDataFromYr = functions
     corsHandler(req, res, async () => {
       const reqData = req.body.data;
 
-      functions.logger.info("Running function getWeatherDataFromYr...");
+      functions.logger.info(
+        "Running function getWeatherDataFromYr...",
+        reqData
+      );
       functions.logger.info(
         `Request query params: lat=${reqData.lat}, lon=${reqData.lon}}`
       );
@@ -65,20 +69,7 @@ export const getWeatherDataFromYr = functions
 
       const result = await fetch(url)
         .then((res: any) => res.json())
-        .then((res: any) => {
-          return {
-            next6hoursSymbol:
-              res.properties.timeseries[0].data.next_6_hours.summary
-                .symbol_code,
-            next6hoursPrecAmount:
-              res.properties.timeseries[0].data.next_6_hours.details
-                .precipitation_amount,
-            next3DaysSymbol:
-              res.properties.timeseries[0].data.next_12_hours.summary
-                .symbol_code,
-            next3DaysPrecAmount: getPrecipitationNext3Days(res),
-          };
-        })
+        .then((res: any) => parseWeatherData(res))
         .catch((error: any) => {
           functions.logger.error(
             "Caught error while fetching from Yr api, error: ",
@@ -91,21 +82,120 @@ export const getWeatherDataFromYr = functions
     });
   });
 
-const getPrecipitationNext3Days = (yrData: any) => {
+const parseWeatherData = (yrData: any): YrWeatherData => {
   const timeseries = yrData.properties.timeseries;
-  const currentDate = timeseries[0].time;
 
-  let totalPrecip = 0;
+  // --- Next 6 hours ---
+  const next6hoursSymbol = timeseries[0].data.next_6_hours.summary.symbol_code;
+  const next6hoursPrecAmount =
+    timeseries[0].data.next_6_hours.details.precipitation_amount;
+  // Temp
+  let next6hoursTempMin = 0;
+  let next6hoursTempMax = 0;
+  let next6hoursWindMin = 0;
+  let next6hoursWindMinDirection = 0;
+  let next6hoursWindMax = 0;
+  let next6hoursWindMaxDirection = 0;
+
+  // Finding min and max temp and wind next 6 hours
+  for (let i = 0; i < 6; i++) {
+    const tempAtCurrentTime =
+      timeseries[i].data.instant.details.air_temperature;
+    const windAtCurrentTime = timeseries[i].data.instant.details.wind_speed;
+
+    // Temp
+    if (tempAtCurrentTime < next6hoursTempMin)
+      next6hoursTempMin = tempAtCurrentTime;
+    if (tempAtCurrentTime > next6hoursTempMax)
+      next6hoursTempMax = tempAtCurrentTime;
+
+    // Wind
+    if (windAtCurrentTime < next6hoursWindMin) {
+      next6hoursWindMin = windAtCurrentTime;
+      next6hoursWindMinDirection =
+        timeseries[i].data.instant.details.wind_from_direction;
+    }
+    if (windAtCurrentTime > next6hoursWindMax) {
+      next6hoursWindMax = windAtCurrentTime;
+      next6hoursWindMaxDirection =
+        timeseries[i].data.instant.details.wind_from_direction;
+    }
+  }
+
+  // --- Next 3 days ---
+  const next3DaysSymbol = timeseries[0].data.next_12_hours.summary.symbol_code;
+  let next3DaysTotalPrecip = 0;
+  let next3DaysWindMin = 0;
+  let next3DaysWindMinDirection = 0;
+  let next3DaysWindMax = 0;
+  let next3DaysWindMaxDirection = 0;
+  let next3DaysTempMin = 0;
+  let next3DaysTempMax = 0;
+
+  const threeDaysFromToday = addDays(new Date(timeseries[0].time), 3);
 
   timeseries.forEach((t: any) => {
-    if (t.data.next_1_hours) {
-      totalPrecip += t.data.next_1_hours.details.precipitation_amount;
-    } else {
-      if (t.data.next_6_hours && isBefore(t.time, addDays(currentDate, 3))) {
-        totalPrecip += t.data.next_6_hours.details.precipitation_amount;
+    const dataAtTime = t.data.instant.details;
+
+    if (isBefore(new Date(t.time), threeDaysFromToday)) {
+      // Set min/max wind and wind direction
+      if (dataAtTime.wind_speed > next3DaysWindMax) {
+        next3DaysWindMax = dataAtTime.wind_speed;
+        next3DaysWindMaxDirection = dataAtTime.wind_from_direction;
+      }
+      if (dataAtTime.wind_speed < next3DaysWindMin) {
+        next3DaysWindMin = dataAtTime.wind_speec;
+        next3DaysWindMinDirection = dataAtTime.wind_from_direction;
+      }
+
+      // Set min/max temp
+      if (dataAtTime.air_temperature > next3DaysTempMax)
+        next3DaysTempMax = dataAtTime.air_temperature;
+      if (dataAtTime.air_temperature < next3DaysTempMin)
+        next3DaysTempMin = dataAtTime.air_temperature;
+
+      // Accumulate precipitation
+      if (t.data.next_1_hours) {
+        next3DaysTotalPrecip +=
+          t.data.next_1_hours.details.precipitation_amount;
+      } else if (t.data.next_6_hours) {
+        // After ~2 days yr data has only data each 6 hours, with "next_6_hours" value
+        next3DaysTotalPrecip +=
+          t.data.next_6_hours.details.precipitation_amount;
       }
     }
   });
 
-  return totalPrecip;
+  let weatherData: YrWeatherData = {
+    next6Hours: {
+      weatherSymbol: next6hoursSymbol,
+      precAmount: next6hoursPrecAmount,
+      tempData: {
+        tempMin: next6hoursTempMin,
+        tempMax: next6hoursTempMax,
+      },
+      windData: {
+        windMin: next6hoursWindMin,
+        windMinDirection: next6hoursWindMinDirection,
+        windMax: next6hoursWindMax,
+        windMaxDirection: next6hoursWindMaxDirection,
+      },
+    },
+    next3Days: {
+      weatherSymbol: next3DaysSymbol,
+      precAmount: next3DaysTotalPrecip,
+      tempData: {
+        tempMin: next3DaysTempMin,
+        tempMax: next3DaysTempMax,
+      },
+      windData: {
+        windMin: next3DaysWindMin,
+        windMinDirection: next3DaysWindMinDirection,
+        windMax: next3DaysWindMax,
+        windMaxDirection: next3DaysWindMaxDirection,
+      },
+    },
+  };
+
+  return weatherData;
 };

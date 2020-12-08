@@ -1,3 +1,4 @@
+import { YrWeatherData } from "./data/contracts";
 import { firebaseFunctions } from "./firebase";
 import { varsomMockData } from "./varsomMockData";
 
@@ -22,7 +23,7 @@ export interface IDayWeatherForecast {
 
 export async function getWeatherFromYr(
   coordinates: GoogleMapsCoordinates | null
-) {
+): Promise<YrWeatherData | null> {
   if (!coordinates) return null;
 
   var getWeather = firebaseFunctions.httpsCallable("getWeatherDataFromYr");
@@ -31,12 +32,15 @@ export async function getWeatherFromYr(
     lat: coordinates.lat,
     lon: coordinates.lon,
   }).then((res) => {
-    return {
-      next6hoursSymbol: res.data.next6hoursSymbol,
-      next6hoursPrecAmount: res.data.next6hoursPrecAmount,
-      next3DaysSymbol: res.data.next3DaysSymbol,
-      next3DaysPrecAmount: res.data.next3DaysPrecAmount,
-    };
+    const weatherData: YrWeatherData = res.data;
+    console.log(weatherData);
+    return weatherData;
+    // return {
+    //   next6hoursSymbol: res.data.next6hoursSymbol,
+    //   next6hoursPrecAmount: res.data.next6hoursPrecAmount,
+    //   next3DaysSymbol: res.data.next3DaysSymbol,
+    //   next3DaysPrecAmount: res.data.next3DaysPrecAmount,
+    // };
   });
 
   console.log(result);
