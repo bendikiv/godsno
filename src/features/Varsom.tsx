@@ -1,4 +1,14 @@
-import { Box, Flex, Heading, Image, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Flex,
+  Heading,
+  Image,
+  Stat,
+  StatHelpText,
+  StatLabel,
+  StatNumber,
+  Text,
+} from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import {
   getVarselFromVarsomSimple,
@@ -53,13 +63,18 @@ const VarsomDagsVarsel = ({ dagsVarsel }: DagsVarselProps) => {
   return (
     <Flex borderTop="1px" p="0.5rem" justifyContent="space-between">
       <Box>
-        <Text>{dagsVarsel.validFrom.toLocaleString().substr(0, 10)}</Text>
-        <Heading size="lg" mb="2rem">
-          Faregrad: {dagsVarsel.dangerLevel}
-        </Heading>
-        <Box mb="1rem">
-          <Text>{dagsVarsel.mainText}</Text>
-        </Box>
+        <Flex justifyContent="space-between">
+          <Stat>
+            <StatLabel>Faregrad</StatLabel>
+            <StatNumber>{dagsVarsel.dangerLevel}</StatNumber>
+            <StatHelpText>
+              {dagsVarsel.validFrom.toLocaleString().substr(0, 10)}
+            </StatHelpText>
+          </Stat>
+          <Box width="70%" textAlign="left" mb="1rem">
+            <Text>{dagsVarsel.mainText}</Text>
+          </Box>
+        </Flex>
         <Box>
           {avyProblemTypes.map(
             (avyProblemType: IAvalancheProblemType, i: number) => (
