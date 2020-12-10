@@ -7,6 +7,7 @@ import { SearchIcon } from "@chakra-ui/icons";
 import { VarsomComponent } from "./features/Varsom";
 import { YrComponent } from "./features/Yr";
 import { Instagram } from "./features/Instagram";
+import { SeNorge } from "./features/SeNorge";
 
 function App() {
   const [addressQuery, setAddressQuery] = useState("");
@@ -42,31 +43,50 @@ function App() {
           </Heading>
         </Box>
       </Box>
-      <Flex justifyContent="space-around" flexWrap="wrap">
-        <Box
-          width="35rem"
-          minHeight="20rem"
-          boxShadow={"5px 5px 8px #f4a261"}
-          mb="2rem"
-        >
-          <VarsomComponent coordinates={addressCoordinates} />
+      <Flex>
+        <Box mr="5rem">
+          <Box
+            width="35rem"
+            minHeight="20rem"
+            boxShadow={"5px 5px 8px #f4a261"}
+            mb="2rem"
+          >
+            <VarsomComponent coordinates={addressCoordinates} />
+          </Box>
         </Box>
-        <Box
-          width="35rem"
-          height="20rem"
-          boxShadow={"5px 5px 8px #90e0ef"}
-          mb="2rem"
+        <Flex
+          justifyContent="flex-start"
+          flexWrap="wrap"
+          alignContent="flex-start"
         >
-          <YrComponent coordinates={addressCoordinates} />
-        </Box>
-        <Box
-          width="35rem"
-          height="20rem"
-          boxShadow={"5px 5px 8px #833AB4"}
-          mb="2rem"
-        >
-          <Instagram />
-        </Box>
+          <Box
+            width="35rem"
+            height="20rem"
+            mr="5rem"
+            mb="5rem"
+            boxShadow={"5px 5px 8px #90e0ef"}
+          >
+            <YrComponent coordinates={addressCoordinates} />
+          </Box>
+          <Box
+            width="35rem"
+            height="20rem"
+            mr="5rem"
+            mb="5rem"
+            boxShadow={"5px 5px 8px #833AB4"}
+          >
+            <Instagram />
+          </Box>
+          <Box
+            width="35rem"
+            height="20rem"
+            mr="5rem"
+            mb="5rem"
+            boxShadow={"5px 5px 8px #1B1AEA"}
+          >
+            <SeNorge />
+          </Box>
+        </Flex>
       </Flex>
     </div>
   );
