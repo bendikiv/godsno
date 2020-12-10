@@ -1,13 +1,12 @@
 import { YrWeatherData } from "./data/contracts";
 import { firebaseFunctions } from "./firebase";
-import { varsomMockData } from "./varsomMockData";
+// import { varsomMockData } from "./varsomMockData";
 
 const USE_STATIC_DATA = true;
 
 const varsomBaseUrl =
   "https://api01.nve.no/hydrology/forecast/avalanche/v6.0.0/api/AvalancheWarningByCoordinates";
 
-// const varsomSimpleUrl = "Simple";
 const varsomDetailedUrl = "Detail";
 
 const googleMapsApiKey = "AIzaSyBXOqcLadhK_VfFAJxnDn5mue4gQD_Sl20";
@@ -28,23 +27,10 @@ export async function getWeatherFromYr(
 
   var getWeather = firebaseFunctions.httpsCallable("getWeatherDataFromYr");
 
-  const result = await getWeather({
+  return await getWeather({
     lat: coordinates.lat,
     lon: coordinates.lon,
-  }).then((res) => {
-    const weatherData: YrWeatherData = res.data;
-    console.log(weatherData);
-    return weatherData;
-    // return {
-    //   next6hoursSymbol: res.data.next6hoursSymbol,
-    //   next6hoursPrecAmount: res.data.next6hoursPrecAmount,
-    //   next3DaysSymbol: res.data.next3DaysSymbol,
-    //   next3DaysPrecAmount: res.data.next3DaysPrecAmount,
-    // };
-  });
-
-  console.log(result);
-  return result;
+  }).then((res) => res.data);
 }
 
 export interface IAvyAdvice {
@@ -75,14 +61,12 @@ export async function getVarselFromVarsomSimple(
 
   const url = `${varsomBaseUrl}/${varsomDetailedUrl}/${coordinates.lat}/${coordinates.lon}/1`;
 
-  const mockData = varsomMockData;
-
   return fetch(url)
     .then((res) => res.json())
     .then((res) => {
       if (!res) return null;
 
-      if (USE_STATIC_DATA) res = mockData;
+      // if (USE_STATIC_DATA) res = varsomMockData;
 
       const varsomVarsel: IDagsVarsel[] = res.map((r: any) => {
         const dagsVarsel: IDagsVarsel = {
