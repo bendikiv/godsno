@@ -1,9 +1,8 @@
-import { Box, Divider, Flex, Heading, Image, Text } from "@chakra-ui/react";
+import { Box, Flex, Heading, Text } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import {
   getVarselFromVarsomSimple,
   GoogleMapsCoordinates,
-  IAvyAdvice,
   IAvyProblem,
   IDagsVarsel,
 } from "../api";
@@ -53,30 +52,21 @@ const VarsomDagsVarsel = ({ dagsVarsel }: DagsVarselProps) => {
         <Box textAlign="left">
           {dagsVarsel.avyProblems.map((avyProb: IAvyProblem, i: number) => {
             return (
-              <Box key={i} mb="1rem">
-                <Heading size="sm">Skredproblem {i + 1}:</Heading>
-                <Text>{avyProb.name}</Text>
-                <Text>{avyProb.description}</Text>
+              <Box key={i} p="0 2rem">
+                <Box mb="1rem">
+                  <Text>{dagsVarsel.mainText}</Text>
+                </Box>
+                <Box key={i} mb="1rem">
+                  <Text mb="0.5rem">Skredproblem</Text>
+                  <Box ml="1rem">
+                    <Heading size="sm">{avyProb.name}</Heading>
+                    <Text fontSize="xs">{avyProb.description}</Text>
+                  </Box>
+                </Box>
               </Box>
             );
           })}
         </Box>
-      </Box>
-      <Box width="50%">
-        {dagsVarsel.advices.map((a: IAvyAdvice, i: number) => {
-          return (
-            <Box key={i}>
-              <Heading size="sm">Ferdselsråd:</Heading>
-              <Flex>
-                <Image src={a.imgUrl} width="40%" height="40$" />
-                <Text pl="0.5rem" textAlign="left">
-                  {a.text}
-                </Text>
-              </Flex>
-              {i !== 0 && <Divider orientation="horizontal" />}
-            </Box>
-          );
-        })}
       </Box>
     </Flex>
   );

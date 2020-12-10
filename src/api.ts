@@ -45,6 +45,7 @@ export interface IAvyProblem {
 }
 
 export interface IDagsVarsel {
+  mainText: string;
   dangerLevel: string;
   regionName: string;
   regionId: number;
@@ -71,6 +72,7 @@ export async function getVarselFromVarsomSimple(
       const varsomVarsel: IDagsVarsel[] = res.map((r: any) => {
         const dagsVarsel: IDagsVarsel = {
           dangerLevel: r.DangerLevel,
+          mainText: r.MainText,
           regionId: r.RegionId,
           regionName: r.RegionName,
           validFrom: r.ValidFrom,
@@ -102,12 +104,17 @@ export interface GoogleMapsCoordinates {
 }
 
 export async function getCoordinatesFromAddress(address: string) {
-  const hemsedalCoordinates: GoogleMapsCoordinates = {
-    lat: "60.86306479999999",
-    lon: "8.552375999999999",
+  // const hemsedalCoordinates: GoogleMapsCoordinates = {
+  //   lat: "60.86306479999999",
+  //   lon: "8.552375999999999",
+  // };
+
+  const jotunheimenCoordinates: GoogleMapsCoordinates = {
+    lat: "61.6333333",
+    lon: "8.2999999",
   };
 
-  if (USE_STATIC_DATA) return hemsedalCoordinates;
+  if (USE_STATIC_DATA) return jotunheimenCoordinates;
 
   if (!address || address === "") return null;
 
