@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, Text } from "@chakra-ui/react";
+import { Box, Flex, Heading, Image, Text } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import {
   getVarselFromVarsomSimple,
@@ -6,6 +6,10 @@ import {
   IAvyProblem,
   IDagsVarsel,
 } from "../api";
+import {
+  mapFromAvalancheProblemTypeIdToImage,
+  IAvalancheProblemType,
+} from "../utilities/varsomUtilities";
 
 interface VarsomProps {
   coordinates: GoogleMapsCoordinates | null;
@@ -42,6 +46,10 @@ interface DagsVarselProps {
 }
 
 const VarsomDagsVarsel = ({ dagsVarsel }: DagsVarselProps) => {
+  const avyProblemTypes = dagsVarsel.avyProblems.map((a: IAvyProblem) =>
+    mapFromAvalancheProblemTypeIdToImage(a.avyProblemTypeId)
+  );
+
   return (
     <Flex borderTop="1px" p="0.5rem" justifyContent="space-between">
       <Box>
@@ -49,13 +57,31 @@ const VarsomDagsVarsel = ({ dagsVarsel }: DagsVarselProps) => {
         <Heading size="lg" mb="2rem">
           Faregrad: {dagsVarsel.dangerLevel}
         </Heading>
+        <Box mb="1rem">
+          <Text>{dagsVarsel.mainText}</Text>
+        </Box>
+        <Box>
+          {avyProblemTypes.map(
+            (avyProblemType: IAvalancheProblemType, i: number) => (
+              <Box key={i} mb="1rem">
+                <Image
+                  boxSize="4rem"
+                  margin="auto"
+                  src={
+                    window.location.origin +
+                    `/images/varsom/skredproblemer/${avyProblemType.imageName}.jpg`
+                  }
+                  alt="avalanche problem"
+                  title={avyProblemType.description}
+                />
+              </Box>
+            )
+          )}
+        </Box>
         <Box textAlign="left">
           {dagsVarsel.avyProblems.map((avyProb: IAvyProblem, i: number) => {
             return (
               <Box key={i} p="0 2rem">
-                <Box mb="1rem">
-                  <Text>{dagsVarsel.mainText}</Text>
-                </Box>
                 <Box key={i} mb="1rem">
                   <Text mb="0.5rem">Skredproblem</Text>
                   <Box ml="1rem">

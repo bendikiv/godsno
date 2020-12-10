@@ -39,7 +39,7 @@ export interface IAvyAdvice {
 }
 
 export interface IAvyProblem {
-  avyProblemId: number;
+  avyProblemTypeId: number;
   name: string;
   description: string;
 }
@@ -78,13 +78,15 @@ export async function getVarselFromVarsomSimple(
           validFrom: r.ValidFrom,
           validTo: r.ValidTo,
           avyProblems: r.AvalancheProblems
-            ? r.AvalancheProblems.map((avyProb: any) => {
-                return {
-                  avyProblemId: avyProb.AvalCauseId,
-                  name: avyProb.AvalancheProblemTypeName,
-                  description: avyProb.AvalCauseName,
-                };
-              })
+            ? r.AvalancheProblems.map(
+                (avyProb: any): IAvyProblem => {
+                  return {
+                    avyProblemTypeId: avyProb.AvalancheProblemTypeId,
+                    name: avyProb.AvalancheProblemTypeName,
+                    description: avyProb.AvalCauseName,
+                  };
+                }
+              )
             : [],
           advices: r.AvalancheAdvices
             ? r.AvalancheAdvices.map((a: any) => {
