@@ -1,7 +1,8 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { addDays, isBefore } from "date-fns";
-import { YrWeatherData } from "./contracts";
+import { YrWeatherData, NveSnowDepthData } from "./contracts";
+import { convertFromLatLonToUtm33N } from "./utils";
 let cors = require("cors");
 const fetch = require("node-fetch");
 
@@ -41,6 +42,61 @@ export const helloWorld = functions
         });
 
       response.status(200).json({ data: result, gotResult: result !== null });
+    });
+  });
+
+export const getSnowDepthAtDateFromNve = functions
+  .region(FIREBASE_REGION)
+  .https.onRequest(async (req: functions.Request, res: functions.Response) => {
+    corsHandler(req, res, async () => {
+      functions.logger.info(
+        "\n\n\t\tRunning function getSnowDepthAtDateFromNve...\n\n"
+      );
+
+      const query = req.body.data; //req.query;
+
+      functions.logger.info(
+        `Request query params: lat=${query.lat}, lon=${query.lon}, date=${query.date}`
+      );
+
+      const baseUrl = "http://h-web02.nve.no:8080/api";
+      const reqData = {
+        lat: query.lat?.toString() || "",
+        lon: query.lon?.toString() || "",
+        date: query.date?.toString() || "",
+      };
+
+      const utmCoordinates = convertFromLatLonToUtm33N(
+        reqData.lat,
+        reqData.lon
+      );
+
+      functions.logger.info(
+        `Converted from lat/lon to UTM Zone 33N: easting=${utmCoordinates.easting}, northing=${utmCoordinates.northing}`
+      );
+
+      const url = `${baseUrl}/GridTimeSeries/${utmCoordinates.easting}/${utmCoordinates.northing}/${reqData.date}/${reqData.date}/sd.json`;
+
+      const result = await fetch(url)
+        .then((res: any) => res.json())
+        .then((res: any) => {
+          const snowDepth: NveSnowDepthData = {
+            unit: res.Unit,
+            snowdepth: res.Data[0], // Data is an array, only one element if we request data on single day
+            altitude: res.Altitude,
+            date: res.StartDate,
+          };
+          return snowDepth;
+        })
+        .catch((error: any) => {
+          functions.logger.error(
+            "Caught error while fetching snødybde from NVE api, error: ",
+            error
+          );
+          return null;
+        });
+
+      res.status(200).json({ data: result, gotResult: result !== null });
     });
   });
 
