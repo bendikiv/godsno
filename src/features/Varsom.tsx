@@ -15,7 +15,7 @@ import {
   GoogleMapsCoordinates,
   IAvyProblem,
   IDagsVarsel,
-} from "../api";
+} from "../data/api";
 import {
   mapFromAvalancheProblemTypeIdToImage,
   IAvalancheProblemType,

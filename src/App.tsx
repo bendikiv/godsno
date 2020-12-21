@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import "./App.css";
 import { Box, Heading, Input, IconButton, Flex } from "@chakra-ui/react";
 
-import { getCoordinatesFromAddress, GoogleMapsCoordinates } from "./api";
+import { getCoordinatesFromAddress, GoogleMapsCoordinates } from "./data/api";
 import { SearchIcon } from "@chakra-ui/icons";
 import { VarsomComponent } from "./features/Varsom";
 import { YrComponent } from "./features/Yr";
 import { Instagram } from "./features/Instagram";
-import { SeNorge } from "./features/SeNorge";
+import { SeNorge } from "./features/SeNorge/SeNorge";
 
 function App() {
   const [addressQuery, setAddressQuery] = useState("");
@@ -84,7 +84,7 @@ function App() {
             mb="5rem"
             boxShadow={"5px 5px 8px #1B1AEA"}
           >
-            <SeNorge />
+            <SeNorge coordinates={addressCoordinates} />
           </Box>
         </Flex>
       </Flex>

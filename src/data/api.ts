@@ -1,8 +1,8 @@
-import { YrWeatherData } from "./data/contracts";
-import { firebaseFunctions } from "./firebase";
+import { YrWeatherData } from "./contracts";
+import { firebaseFunctions } from "../firebase";
 // import { varsomMockData } from "./varsomMockData";
 
-const USE_STATIC_DATA = true;
+const USE_STATIC_DATA = false;
 
 const varsomBaseUrl =
   "https://api01.nve.no/hydrology/forecast/avalanche/v6.0.0/api/AvalancheWarningByCoordinates";
@@ -12,13 +12,6 @@ const varsomDetailedUrl = "Detail";
 const googleMapsApiKey = "AIzaSyBXOqcLadhK_VfFAJxnDn5mue4gQD_Sl20";
 
 const googleMapsBaseUrl = "https://maps.googleapis.com/maps/api/geocode/json";
-
-export interface IDayWeatherForecast {
-  next6hoursSymbol: string;
-  next6hoursPrecAmount: number;
-  next3DaysSymbol: string;
-  next3DaysPrecAmount: number;
-}
 
 export async function getWeatherFromYr(
   coordinates: GoogleMapsCoordinates | null
@@ -125,6 +118,7 @@ export async function getCoordinatesFromAddress(address: string) {
     .then((res) => res.json())
     .then((res) => {
       if (!res) return null;
+      console.log(res);
       const lon = res.results[0].geometry.location.lng;
       const lat = res.results[0].geometry.location.lat;
       const coordinates: GoogleMapsCoordinates = {

@@ -24,3 +24,17 @@ export interface YrTempData {
   tempMin: number;
   tempMax: number;
 }
+
+export interface NveSnowDepthData {
+  unit: string;
+  snowdepth: string;
+  altitude: string;
+  date: string;
+}
+
+export interface UTMCoordinates {
+  easting: string;
+  northing: string;
+  zoneNum: string;
+  zoneLetter: string;
+}

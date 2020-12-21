@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getWeatherFromYr, GoogleMapsCoordinates } from "../api";
+import { getWeatherFromYr, GoogleMapsCoordinates } from "../data/api";
 import { YrWeatherData } from "../data/contracts";
 import { Box, Flex, Heading, Icon, Image, Text } from "@chakra-ui/react";
 import {
