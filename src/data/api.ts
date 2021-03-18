@@ -9,7 +9,7 @@ const varsomBaseUrl =
 
 const varsomDetailedUrl = "Detail";
 
-const googleMapsApiKey = "AIzaSyBXOqcLadhK_VfFAJxnDn5mue4gQD_Sl20";
+const googleMapsApiKey = ""; // need to add this in a more secure way!
 
 const googleMapsBaseUrl = "https://maps.googleapis.com/maps/api/geocode/json";
 
